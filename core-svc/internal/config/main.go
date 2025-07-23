@@ -10,17 +10,18 @@ type CoreConfig struct {
 	DATABASE_URL string
 }
 
-func loadEnviroment() {
-	err := env.Load("./../../.env")
+func loadEnvironment() {
+	err := env.Load(".env")
 	if err != nil {
 		log.Fatal("Unable to load the core enviroment file")
 		panic(".env" + err.Error())
 	}
 
 }
+
 func GetCoreConfig() CoreConfig {
 
-	loadEnviroment()
+	loadEnvironment()
 	DatabaseUrl := os.Getenv("DATABASE_URL")
 
 	return CoreConfig{DATABASE_URL: DatabaseUrl}

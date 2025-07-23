@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "./proto/v1";
+
+package v1;
+
+service AuthService {
+    rpc Login(LoginRequest) returns (LoginResponse);
+}
+
+message LoginRequest {
+
+    string google_token = 1;
+
+}
+
+message LoginResponse {
+    string refresh_token = 1;
+}
+

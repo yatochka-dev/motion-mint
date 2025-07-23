@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:16.2
-    container_name: postgres_db_3
+    container_name: postgres_db_mm
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -22,7 +22,7 @@ services:
 
   adminer:
     image: adminer:latest
-    container_name: adminer_mindbridge
+    container_name: adminer_mm
     ports:
       - "7075:8080"  # Adminer uses port 8080 in the container
     depends_on:
