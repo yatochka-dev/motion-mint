@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/yatochka-dev/motion-mint/core-svc/internal/config"
+	"net/http"
 )
 
 var ctx = context.Background()
@@ -19,5 +20,7 @@ func main() {
 		panic(err)
 	}
 	defer conn.Close(ctx)
+
+	mux := http.NewServeMux()
 
 }

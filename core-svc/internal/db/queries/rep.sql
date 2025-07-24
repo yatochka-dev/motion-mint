@@ -12,6 +12,6 @@ WHERE workout_set_id = $1
 ORDER BY rep_index;
 
 -- name: GetMaxRepIndex :one
-SELECT COALESCE(MAX(rep_index), 0) AS max_idx
+SELECT CAST(COALESCE(MAX(rep_index), 0) as integer) AS max_idx
 FROM rep
 WHERE workout_set_id = $1;

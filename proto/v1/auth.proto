@@ -1,20 +1,21 @@
 syntax = "proto3";
 
-option go_package = "./proto/v1";
+option go_package = "github.com/motion-mint/core-svc/gen/go/motionmint/v1;motionmintv1";
 
-package v1;
+package motionmint.v1;
 
 service AuthService {
-    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc LoginWIthGoogle(LoginWIthGoogleRequest) returns (LoginResponse);
 }
 
-message LoginRequest {
+message LoginWIthGoogleRequest {
 
-    string google_token = 1;
+    string id_token = 1;
 
 }
 
 message LoginResponse {
-    string refresh_token = 1;
+    string session_token = 1;
 }
+
 

@@ -1,0 +1,23 @@
+version: v1
+plugins:
+  # === Go ===
+  - name: go
+    out: gen/go
+    opt: paths=source_relative
+  - name: go-grpc            # optional, for classic gRPC
+    out: gen/go
+    opt: paths=source_relative
+  - name: connect-go         # Connect stubs
+    out: gen/go
+    opt: paths=source_relative
+
+  # === Dart ===
+  - name: dart
+    out: gen/dart             # connect-dart uses vanilla proto stubs
+
+  # === C++ ===
+  - name: cpp
+    out: gen/cpp
+  - name: grpc
+    out: gen/cpp
+    path: grpc_cpp_plugin
