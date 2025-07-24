@@ -13,14 +13,14 @@ import (
 )
 
 const getMaxRepIndex = `-- name: GetMaxRepIndex :one
-SELECT COALESCE(MAX(rep_index), 0) AS max_idx
+SELECT CAST(COALESCE(MAX(rep_index), 0) as integer) AS max_idx
 FROM rep
 WHERE workout_set_id = $1
 `
 
-func (q *Queries) GetMaxRepIndex(ctx context.Context, workoutSetID uuid.UUID) (interface{}, error) {
+func (q *Queries) GetMaxRepIndex(ctx context.Context, workoutSetID uuid.UUID) (int32, error) {
 	row := q.db.QueryRow(ctx, getMaxRepIndex, workoutSetID)
-	var max_idx interface{}
+	var max_idx int32
 	err := row.Scan(&max_idx)
 	return max_idx, err
 }

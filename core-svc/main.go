@@ -4,7 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5"
+	mmv1c "github.com/yatochka-dev/motion-mint/core-svc/gen/go/v1/motionmintv1connect"
 	"github.com/yatochka-dev/motion-mint/core-svc/internal/config"
+	"github.com/yatochka-dev/motion-mint/core-svc/internal/db/repository"
+	"github.com/yatochka-dev/motion-mint/core-svc/internal/service/auth"
+	transportAuth "github.com/yatochka-dev/motion-mint/core-svc/internal/transport/auth"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"net/http"
 )
 
@@ -14,13 +20,30 @@ func main() {
 	fmt.Println("So much to do....")
 
 	c := config.GetCoreConfig()
-	fmt.Println(c)
-	conn, err := pgx.Connect(context.Background(), c.DATABASE_URL)
+
+	/* -------------- DB CONNECTION ----------------*/
+	conn, err := pgx.Connect(context.Background(), c.DatabaseUrl)
 	if err != nil {
 		panic(err)
 	}
 	defer conn.Close(ctx)
+	repo := repository.New(conn)
 
+	d := repo.Test(ctx)
+	fmt.Println(d)
+	/* -------------- AUTH SERVICE ----------------*/
+	authSvc := auth.NewService(repo)
+	authImpl := transportAuth.New(authSvc)                         // implements mmv1c.AuthServiceHandler
+	authPath, authHandler := mmv1c.NewAuthServiceHandler(authImpl) // HTTP handler + route
+
+	/* -------------- ASSIGN HANDLERS ----------------*/
 	mux := http.NewServeMux()
+	mux.Handle(authPath, authHandler)
 
+	/* -------------- START SERVER ----------------*/
+	err = http.ListenAndServe(":8080", h2c.NewHandler(mux, &http2.Server{}))
+
+	if err != nil {
+		panic(err)
+	}
 }

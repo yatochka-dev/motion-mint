@@ -56,22 +56,16 @@ func (ns NullWorkoutSetStatus) Value() (driver.Value, error) {
 }
 
 type AppUser struct {
-	ID        uuid.UUID          `json:"id"`
-	Email     string             `json:"email"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID           uuid.UUID          `json:"id"`
+	Name         string             `json:"name"`
+	Email        string             `json:"email"`
+	PasswordHash string             `json:"password_hash"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 type Exercise struct {
 	ID   int16  `json:"id"`
 	Name string `json:"name"`
-}
-
-type RefreshToken struct {
-	Token     string             `json:"token"`
-	UserID    uuid.UUID          `json:"user_id"`
-	IssuedAt  pgtype.Timestamptz `json:"issued_at"`
-	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
-	UserAgent pgtype.Text        `json:"user_agent"`
 }
 
 type Rep struct {

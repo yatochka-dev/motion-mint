@@ -7,7 +7,8 @@ import (
 )
 
 type CoreConfig struct {
-	DATABASE_URL string
+	DatabaseUrl string
+	AuthSecret  string
 }
 
 func loadEnvironment() {
@@ -24,5 +25,5 @@ func GetCoreConfig() CoreConfig {
 	loadEnvironment()
 	DatabaseUrl := os.Getenv("DATABASE_URL")
 
-	return CoreConfig{DATABASE_URL: DatabaseUrl}
+	return CoreConfig{DatabaseUrl: DatabaseUrl, AuthSecret: "ajhwdvawhujydfgiuqw3"}
 }

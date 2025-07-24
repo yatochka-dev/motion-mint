@@ -1,0 +1,25 @@
+# buf.gen.yaml
+version: v2
+plugins:
+  # ── Go stubs (local plugins) ─────────────────────────
+  - local: protoc-gen-go                # ← no “name:”
+    out: core-svc/gen/go
+    opt: paths=source_relative
+
+  - local: protoc-gen-go-grpc
+    out: core-svc/gen/go
+    opt: paths=source_relative
+
+  - local: protoc-gen-connect-go
+    out: core-svc/gen/go
+    opt: paths=source_relative
+
+  # ── Dart protobuf models (remote plugin on BSR) ──────
+  - remote: buf.build/protocolbuffers/dart
+    out: mobile/lib/gen
+    include_wkt: true
+    include_imports: true
+
+  # ── Dart Connect clients (remote) ────────────────────
+  - remote: buf.build/connectrpc/dart
+    out: mobile/lib/gen

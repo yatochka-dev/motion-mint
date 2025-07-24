@@ -1,21 +1,47 @@
 syntax = "proto3";
-
-option go_package = "github.com/motion-mint/core-svc/gen/go/motionmint/v1;motionmintv1";
-
 package motionmint.v1;
 
+option go_package = "github.com/yatochka-dev/motion-mint/core-svc/gen/go/v1;motionmintv1";
+
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message Tokens {
+    string refresh_token = 1;
+    string access_token = 2;
+    uint64 expires_at = 3;
+}
+
+message LogoutRequest {
+    string refresh_token = 1;
+}
+message Empty {}
+
+message RegisterRequest {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message UserProfile {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+
 service AuthService {
-    rpc LoginWIthGoogle(LoginWIthGoogleRequest) returns (LoginResponse);
+    rpc Login(LoginRequest) returns (Tokens);
+    rpc Register(RegisterRequest) returns (Tokens);
+
+    rpc Logout(Empty) returns (Empty);
+
+    rpc Profile(Empty) returns (UserProfile);
 }
 
-message LoginWIthGoogleRequest {
 
-    string id_token = 1;
-
-}
-
-message LoginResponse {
-    string session_token = 1;
-}
 
 

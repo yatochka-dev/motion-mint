@@ -9,42 +9,105 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createUser = `-- name: CreateUser :one
-INSERT INTO app_user (email)
-VALUES ($1) RETURNING id, email, created_at
+const checkEmailExists = `-- name: CheckEmailExists :one
+SELECT EXISTS(
+    SELECT 1 FROM app_user
+    WHERE email = $1
+)
 `
 
-func (q *Queries) CreateUser(ctx context.Context, email string) (AppUser, error) {
-	row := q.db.QueryRow(ctx, createUser, email)
+func (q *Queries) CheckEmailExists(ctx context.Context, email string) (bool, error) {
+	row := q.db.QueryRow(ctx, checkEmailExists, email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const createUser = `-- name: CreateUser :one
+INSERT INTO app_user (name, email, password_hash)
+VALUES ($1, $2, $3) RETURNING id, name, email, password_hash, created_at
+`
+
+type CreateUserParams struct {
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (AppUser, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.PasswordHash)
 	var i AppUser
-	err := row.Scan(&i.ID, &i.Email, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, created_at FROM app_user
+const getPasswordHashByEmail = `-- name: GetPasswordHashByEmail :one
+SELECT password_hash FROM app_user
 WHERE email = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (AppUser, error) {
+func (q *Queries) GetPasswordHashByEmail(ctx context.Context, email string) (string, error) {
+	row := q.db.QueryRow(ctx, getPasswordHashByEmail, email)
+	var password_hash string
+	err := row.Scan(&password_hash)
+	return password_hash, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, name, email, created_at FROM app_user
+WHERE email = $1 LIMIT 1
+`
+
+type GetUserByEmailRow struct {
+	ID        uuid.UUID          `json:"id"`
+	Name      string             `json:"name"`
+	Email     string             `json:"email"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
-	var i AppUser
-	err := row.Scan(&i.ID, &i.Email, &i.CreatedAt)
+	var i GetUserByEmailRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
 
-SELECT id, email, created_at FROM app_user
+SELECT id, name, email, created_at FROM app_user
 WHERE id = $1 LIMIT 1
 `
 
+type GetUserByIDRow struct {
+	ID        uuid.UUID          `json:"id"`
+	Name      string             `json:"name"`
+	Email     string             `json:"email"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 // id, email, created_at
-func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (AppUser, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
-	var i AppUser
-	err := row.Scan(&i.ID, &i.Email, &i.CreatedAt)
+	var i GetUserByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.CreatedAt,
+	)
 	return i, err
 }

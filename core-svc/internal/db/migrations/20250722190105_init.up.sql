@@ -3,7 +3,9 @@ create EXTENSION if not exists "uuid-ossp";
 -- USERS --------------------------------------------------------------------
 create table app_user (
                           id          uuid primary key default uuid_generate_v4(),
+                          name        text not null,
                           email       text unique not null,
+                          password_hash    text not null,
                           created_at  timestamptz default now()
 );
 
@@ -54,13 +56,3 @@ create table rep (
 
 create index rep_set_idx on rep (workout_set_id);
 
--- REFRESH TOKENS -----------------------------------------------------------
-create table refresh_token (
-                               token       text primary key,
-                               user_id     uuid not null references app_user(id),
-                               issued_at   timestamptz default now(),
-                               expires_at  timestamptz,
-                               user_agent  text
-);
-
-create index refresh_token_user_idx on refresh_token (user_id);

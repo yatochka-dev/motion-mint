@@ -2,7 +2,7 @@
 
 # Defaults (override: make cm M=add_users)
 M ?= init
-DB ?= postgres://postgres:kCsn5eKAVPV5zhsG7GjqtYEDeR8mgOoGXdWWUFfp0GzCWVjNdvhBGcE5zTIa4pol@45.143.196.227:3241/postgres?sslmode=disable
+DB ?= postgres://postgres:postgres@localhost:6000/mydb?sslmode=disable
 MIGR_DIR := internal/db/migrations
 
 cm:

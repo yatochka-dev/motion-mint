@@ -1,20 +1,26 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:mobile/screens/login.dart';
+import 'package:mobile/services/auth.service.dart';
+import 'dart:io' as io; // ← add this
 
-void main() {
-  runApp(const MainApp());
-}
+// generated code
+import 'gen/v1/auth.pb.dart';
+import 'gen/v1/auth.connect.client.dart';
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+// connect-dart runtime
+import 'package:connectrpc/io.dart' as connect_io; // dart:io HTTP stack
+import 'package:connectrpc/protobuf.dart'; // ProtoCodec
+import 'package:connectrpc/protocol/connect.dart'
+    as protocol; // Connect protocol
+//  ↑ switch to protocol.grpc / grpc_web if you ever need those
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => CupertinoApp(
+        home: LoginPage(),
+      );
 }
