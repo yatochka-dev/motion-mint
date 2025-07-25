@@ -1,20 +1,22 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:mobile/notifiers/auth.notifier.dart';
 import 'package:mobile/services/auth.service.dart';
 import 'package:mobile/shared/errors.dart';
+import 'package:connectrpc/connect.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
   static Route<void> route() =>
       CupertinoPageRoute(builder: (_) => const RegisterPage());
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-  final _svc = AuthService();
+class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
@@ -39,10 +41,18 @@ class _RegisterPageState extends State<RegisterPage> {
         return;
       }
 
-      final err =
-          await _svc.Register(_nameCtrl.text, _emailCtrl.text, _pwdCtrl.text);
-      if (err != null) {
-        showErrorMessage(context, err);
+      try {
+        final tokens = await ref.read(authServiceProvider).register(
+          _nameCtrl.text,
+          _emailCtrl.text,
+          _pwdCtrl.text,
+        );
+        await ref.read(authNotifierProvider.notifier).login(tokens);
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+      } on ConnectException catch (e) {
+        showErrorMessage(context, e.message);
       }
     }
   }

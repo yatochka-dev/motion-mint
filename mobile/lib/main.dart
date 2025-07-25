@@ -1,26 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:mobile/screens/login.dart';
-import 'package:mobile/services/auth.service.dart';
-import 'dart:io' as io; // ← add this
+import 'package:mobile/screens/home.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/notifiers/auth.notifier.dart';
 
-// generated code
-import 'gen/v1/auth.pb.dart';
-import 'gen/v1/auth.connect.client.dart';
+void main() => runApp(const ProviderScope(child: MyApp()));
 
-// connect-dart runtime
-import 'package:connectrpc/io.dart' as connect_io; // dart:io HTTP stack
-import 'package:connectrpc/protobuf.dart'; // ProtoCodec
-import 'package:connectrpc/protocol/connect.dart'
-    as protocol; // Connect protocol
-//  ↑ switch to protocol.grpc / grpc_web if you ever need those
-
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) => CupertinoApp(
-        home: LoginPage(),
-      );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authNotifierProvider);
+    return auth.when(
+      data: (tokens) => CupertinoApp(
+        home: tokens == null ? const LoginPage() : const HomePage(),
+      ),
+      loading: () => const CupertinoApp(
+        home: CupertinoPageScaffold(child: Center(child: CupertinoActivityIndicator())),
+      ),
+      error: (_, __) => const CupertinoApp(
+        home: CupertinoPageScaffold(child: Center(child: Text('Error'))),
+      ),
+    );
+  }
 }

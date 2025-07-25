@@ -5,7 +5,7 @@ import 'package:connectrpc/io.dart' as connect_io;
 import 'package:connectrpc/protobuf.dart';
 import 'package:connectrpc/protocol/connect.dart' as protocol;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:riverpod/riverpod.dart';
 
 import 'package:mobile/gen/v1/auth.connect.client.dart';
 import 'package:mobile/gen/v1/auth.pb.dart';
@@ -24,18 +24,29 @@ class AuthService {
     ),
   );
 
-  Future<String?> Register(String name, String email, String password) async {
-    try {
+  Future<Tokens> login(String email, String password) async {
+    final tokens = await _client.login(LoginRequest(email: email, password: password));
+    return tokens;
+  }
 
-      final tokens = await _client.register(
-          RegisterRequest(name: name, email: email, password: password));
+  Future<Tokens> register(String name, String email, String password) async {
+    final tokens = await _client.register(
+      RegisterRequest(name: name, email: email, password: password),
+    );
+    return tokens;
+  }
 
-      await _storage.write(key: REFRESH_TOKEN_KEY, value: tokens.refreshToken);
-      await _storage.write(key: ACCESS_TOKEN_KEY, value: tokens.accessToken);
-      await _storage.write(key: EXPIRES_AT_KEY, value: tokens.expiresAt.toString());
-    } on ConnectException catch (e) {
-      return e.message;
-    }
-    return null;
+  Future<Tokens> refresh(String refreshToken) async {
+    final tokens = await _client.refresh(
+      RefreshRequest(refreshToken: refreshToken),
+    );
+    return tokens;
+  }
+
+  Future<void> logout() async {
+    await _client.logout(LogoutRequest(refreshToken: (await _storage.read(key: 'refreshToken')) ?? ''));
+    await _storage.deleteAll();
   }
 }
+
+final authServiceProvider = Provider((ref) => AuthService());

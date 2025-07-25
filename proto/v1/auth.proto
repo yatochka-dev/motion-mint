@@ -15,6 +15,10 @@ message Tokens {
     uint64 expires_at = 3;
 }
 
+message RefreshRequest {
+    string refresh_token = 1;
+}
+
 message LogoutRequest {
     string refresh_token = 1;
 }
@@ -36,8 +40,9 @@ message UserProfile {
 service AuthService {
     rpc Login(LoginRequest) returns (Tokens);
     rpc Register(RegisterRequest) returns (Tokens);
+    rpc Refresh(RefreshRequest) returns (Tokens);
 
-    rpc Logout(Empty) returns (Empty);
+    rpc Logout(LogoutRequest) returns (Empty);
 
     rpc Profile(Empty) returns (UserProfile);
 }
