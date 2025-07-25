@@ -3,6 +3,8 @@ package service
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/yatochka-dev/motion-mint/core-svc/internal/config"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -29,28 +31,27 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// GenerateToken creates a JWT token signed with HS256 and includes user ID and expiry
-//func (t *TokenService) GenerateToken(data AuthTokenData) (string, error) {
-//	claims := Claims{
-//		AuthTokenData: data,
-//		RegisteredClaims: jwt.RegisteredClaims{
-//			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(t.Config.AuthTokenLifespanHours) * time.Hour)),
-//			IssuedAt:  jwt.NewNumericDate(time.Now()),
-//			// Optional: add Issuer, Subject, etc.
-//
-//		},
-//	}
-//
-//	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-//	secret := []byte(t.Config.AuthSecret)
-//
-//	signedToken, err := token.SignedString(secret)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	return signedToken, nil
-//}
+// GenerateToken creates a JWT signed token and returns it with the expiration unix time
+func (t *TokenService) GenerateToken(data AuthTokenData) (string, int64, error) {
+	claims := Claims{
+		AuthTokenData: data,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	secret := []byte(t.Config.AuthSecret)
+
+	signedToken, err := token.SignedString(secret)
+	if err != nil {
+		return "", 0, err
+	}
+
+	return signedToken, claims.ExpiresAt.Unix(), nil
+}
+
 //
 //// ExtractToken extracts the Bearer token string from the "Authorization" header
 //func (t *TokenService) ExtractToken(c context.Context) string {

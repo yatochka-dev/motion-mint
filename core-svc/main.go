@@ -8,6 +8,7 @@ import (
 	"github.com/yatochka-dev/motion-mint/core-svc/internal/config"
 	"github.com/yatochka-dev/motion-mint/core-svc/internal/db/repository"
 	"github.com/yatochka-dev/motion-mint/core-svc/internal/service/auth"
+	tokenservice "github.com/yatochka-dev/motion-mint/core-svc/internal/service/token"
 	transportAuth "github.com/yatochka-dev/motion-mint/core-svc/internal/transport/auth"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -32,7 +33,8 @@ func main() {
 	d := repo.Test(ctx)
 	fmt.Println(d)
 	/* -------------- AUTH SERVICE ----------------*/
-	authSvc := auth.NewService(repo)
+	tokenSvc := tokenservice.NewTokenService(&c)
+	authSvc := auth.NewService(repo, tokenSvc)
 	authImpl := transportAuth.New(authSvc)                         // implements mmv1c.AuthServiceHandler
 	authPath, authHandler := mmv1c.NewAuthServiceHandler(authImpl) // HTTP handler + route
 

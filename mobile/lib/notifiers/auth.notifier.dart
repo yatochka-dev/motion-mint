@@ -1,6 +1,7 @@
 import 'package:mobile/gen/v1/auth.pb.dart';
 import 'package:mobile/models/auth-tokens.dart';
 import 'package:mobile/services/auth-storage.service.dart';
+import 'package:mobile/services/auth.service.dart';
 import 'package:riverpod/riverpod.dart';
 
 final authNotifierProvider = AsyncNotifierProvider<AuthNotifier, AuthTokens?>(() => AuthNotifier());
@@ -43,16 +44,11 @@ class AuthNotifier extends AsyncNotifier<AuthTokens?> {
   }
 
   Future<AuthTokens?> _refreshToken(String refreshToken) async {
-    // try {
-    //   final client = ref.read(authServiceProvider); // <- gRPC client
-    //   final reply = await client.refresh(RefreshRequest(refreshToken: refreshToken));
-    //   return AuthTokens.fromGrpc(
-    //     accessToken: reply.accessToken,
-    //     refreshToken: reply.refreshToken,
-    //     expiresAtUnix: reply.expiresAt.toInt(),
-    //   );
-    // } catch (_) {
-    //   return null;
-    // }
+    try {
+      final svc = ref.read(authServiceProvider);
+      // Placeholder for refresh call - not implemented on backend
+      await svc.logout();
+    } catch (_) {}
+    return null;
   }
 }

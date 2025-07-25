@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 	"github.com/yatochka-dev/motion-mint/core-svc/internal/service/auth"
 
 	"connectrpc.com/connect"
@@ -35,27 +37,38 @@ func (h *handler) Register(
 	ctx context.Context,
 	req *connect.Request[mmv1.RegisterRequest],
 ) (*connect.Response[mmv1.Tokens], error) {
-	//panic("implement me")
-	err := h.svc.Register(ctx, req.Msg.Name, req.Msg.Email, req.Msg.Password)
+	tokens, err := h.svc.Register(ctx, req.Msg.Name, req.Msg.Email, req.Msg.Password)
 	if err != nil {
-		return nil, err // propagate as Connect error
+		return nil, err
 	}
-
-	return connect.NewResponse(&mmv1.Tokens{}), nil
+	return connect.NewResponse(&mmv1.Tokens{
+		RefreshToken: tokens.RefreshToken,
+		AccessToken:  tokens.AccessToken,
+		ExpiresAt:    tokens.ExpiresAt,
+	}), nil
 }
 
 func (h *handler) Profile(
 	ctx context.Context,
 	req *connect.Request[mmv1.Empty],
 ) (*connect.Response[mmv1.UserProfile], error) {
-	panic("implement me")
-	return connect.NewResponse(&mmv1.UserProfile{}), nil
+	profile, err := h.svc.Profile(ctx, uuid.Nil)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&mmv1.UserProfile{
+		Id:    profile.ID.String(),
+		Name:  profile.Name,
+		Email: profile.Email,
+	}), nil
 }
 
 func (h *handler) Logout(
 	ctx context.Context,
 	req *connect.Request[mmv1.Empty],
 ) (*connect.Response[mmv1.Empty], error) {
-	panic("implement me")
+	if err := h.svc.Logout(ctx, uuid.Nil); err != nil {
+		return nil, err
+	}
 	return connect.NewResponse(&mmv1.Empty{}), nil
 }
