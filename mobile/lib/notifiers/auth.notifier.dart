@@ -39,6 +39,10 @@ class AuthNotifier extends AsyncNotifier<AuthTokens?> {
   }
 
   Future<void> logout() async {
+    try {
+      final svc = ref.read(authServiceProvider);
+      await svc.logout();
+    } catch (_) {}
     await _storage.clear();
     state = const AsyncData(null);
   }
@@ -46,9 +50,14 @@ class AuthNotifier extends AsyncNotifier<AuthTokens?> {
   Future<AuthTokens?> _refreshToken(String refreshToken) async {
     try {
       final svc = ref.read(authServiceProvider);
-      // Placeholder for refresh call - not implemented on backend
-      await svc.logout();
-    } catch (_) {}
-    return null;
+      final newTokens = await svc.refresh(refreshToken);
+      return AuthTokens.fromGrpc(
+        accessToken: newTokens.accessToken,
+        refreshToken: newTokens.refreshToken,
+        expiresAtUnix: newTokens.expiresAt.toInt(),
+      );
+    } catch (_) {
+      return null;
+    }
   }
 }

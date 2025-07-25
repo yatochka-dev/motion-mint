@@ -35,7 +35,7 @@ func main() {
 	/* -------------- AUTH SERVICE ----------------*/
 	tokenSvc := tokenservice.NewTokenService(&c)
 	authSvc := auth.NewService(repo, tokenSvc)
-	authImpl := transportAuth.New(authSvc)                         // implements mmv1c.AuthServiceHandler
+	authImpl := transportAuth.New(authSvc, tokenSvc)               // implements mmv1c.AuthServiceHandler
 	authPath, authHandler := mmv1c.NewAuthServiceHandler(authImpl) // HTTP handler + route
 
 	/* -------------- ASSIGN HANDLERS ----------------*/

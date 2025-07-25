@@ -36,8 +36,15 @@ class AuthService {
     return tokens;
   }
 
+  Future<Tokens> refresh(String refreshToken) async {
+    final tokens = await _client.refresh(
+      RefreshRequest(refreshToken: refreshToken),
+    );
+    return tokens;
+  }
+
   Future<void> logout() async {
-    await _client.logout(Empty());
+    await _client.logout(LogoutRequest(refreshToken: (await _storage.read(key: 'refreshToken')) ?? ''));
     await _storage.deleteAll();
   }
 }
