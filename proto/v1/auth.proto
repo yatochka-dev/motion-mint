@@ -10,18 +10,10 @@ message LoginRequest {
 }
 
 message Tokens {
-    string refresh_token = 1;
-    string access_token = 2;
-    uint64 expires_at = 3;
+    string access_token = 1;
+    uint64 expires_at = 2;
 }
 
-message RefreshRequest {
-    string refresh_token = 1;
-}
-
-message LogoutRequest {
-    string refresh_token = 1;
-}
 message Empty {}
 
 message RegisterRequest {
@@ -40,10 +32,6 @@ message UserProfile {
 service AuthService {
     rpc Login(LoginRequest) returns (Tokens);
     rpc Register(RegisterRequest) returns (Tokens);
-    rpc Refresh(RefreshRequest) returns (Tokens);
-
-    rpc Logout(LogoutRequest) returns (Empty);
-
     rpc Profile(Empty) returns (UserProfile);
 }
 
