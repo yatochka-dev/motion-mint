@@ -14,7 +14,7 @@ func Auth(tokens *token.TokenService) connect.UnaryInterceptorFunc {
 		func(next connect.UnaryFunc) connect.UnaryFunc {
 			return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 				procedure := req.Spec().Procedure
-				if procedure != "/motionmint.v1.AuthService/Profile" && procedure != "/motionmint.v1.AuthService/Logout" {
+				if procedure != "/motionmint.v1.AuthService/Profile" {
 					return next(ctx, req)
 				}
 				authHeader := req.Header().Get("Authorization")

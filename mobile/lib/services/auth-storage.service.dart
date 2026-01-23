@@ -13,21 +13,18 @@ class SecureStorageService {
 
   Future<AuthTokens?> getTokens() async {
     final access = await _storage.read(key: 'accessToken');
-    final refresh = await _storage.read(key: 'refreshToken');
     final expiry = await _storage.read(key: 'expiresAt');
 
-    if (access == null || refresh == null || expiry == null) return null;
+    if (access == null || expiry == null) return null;
 
     return AuthTokens(
       accessToken: access,
-      refreshToken: refresh,
       expiresAt: DateTime.fromMillisecondsSinceEpoch(int.parse(expiry)),
     );
   }
 
   Future<void> clear() async {
     await _storage.delete(key: 'accessToken');
-    await _storage.delete(key: 'refreshToken');
     await _storage.delete(key: 'expiresAt');
   }
 }

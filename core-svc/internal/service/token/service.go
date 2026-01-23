@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/yatochka-dev/motion-mint/core-svc/internal/config"
@@ -41,40 +40,12 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-type RefreshClaims struct {
-	AuthTokenData
-	TokenType string `json:"typ"`
-	jwt.RegisteredClaims
-}
-
 // GenerateToken creates a JWT signed token and returns it with the expiration unix time
 func (t *TokenService) GenerateToken(data AuthTokenData) (string, int64, error) {
 	claims := Claims{
 		AuthTokenData: data,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secret := []byte(t.Config.AuthSecret)
-
-	signedToken, err := token.SignedString(secret)
-	if err != nil {
-		return "", 0, err
-	}
-
-	return signedToken, claims.ExpiresAt.Unix(), nil
-}
-
-// GenerateRefreshToken creates a signed refresh token with longer expiration
-func (t *TokenService) GenerateRefreshToken(data AuthTokenData) (string, int64, error) {
-	claims := RefreshClaims{
-		AuthTokenData: data,
-		TokenType:     "refresh",
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour * 30)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(72 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
@@ -119,32 +90,9 @@ func (t *TokenService) ValidateToken(tokenString string) error {
 		return secret, nil
 	})
 
-	expirationTime, err := token.Claims.GetExpirationTime()
-
-	fmt.Println(expirationTime)
+	_, err = token.Claims.GetExpirationTime()
 
 	return err
-}
-
-func (t *TokenService) ValidateRefreshToken(tokenString string) error {
-	secret := []byte(t.Config.AuthSecret)
-
-	token, err := jwt.ParseWithClaims(tokenString, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
-		}
-		return secret, nil
-	})
-	if err != nil {
-		return err
-	}
-
-	claims, ok := token.Claims.(*RefreshClaims)
-	if !ok || !token.Valid || claims.TokenType != "refresh" {
-		return errors.New("invalid refresh token")
-	}
-
-	return nil
 }
 
 // ExtractTokenData parses the token string and extracts AuthTokenData from claims
@@ -167,31 +115,6 @@ func (t *TokenService) ExtractTokenData(tokenString string) (AuthTokenData, erro
 	}
 
 	// Ensure ID is valid UUID
-	if claims.AuthTokenData.ID == uuid.Nil {
-		return AuthTokenData{}, errors.New("token missing user ID")
-	}
-
-	return claims.AuthTokenData, nil
-}
-
-func (t *TokenService) ExtractRefreshTokenData(tokenString string) (AuthTokenData, error) {
-	secret := []byte(t.Config.AuthSecret)
-
-	token, err := jwt.ParseWithClaims(tokenString, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
-		}
-		return secret, nil
-	})
-	if err != nil {
-		return AuthTokenData{}, err
-	}
-
-	claims, ok := token.Claims.(*RefreshClaims)
-	if !ok || !token.Valid || claims.TokenType != "refresh" {
-		return AuthTokenData{}, errors.New("invalid refresh token")
-	}
-
 	if claims.AuthTokenData.ID == uuid.Nil {
 		return AuthTokenData{}, errors.New("token missing user ID")
 	}

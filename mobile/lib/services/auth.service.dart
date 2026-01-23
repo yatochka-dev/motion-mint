@@ -4,17 +4,13 @@ import 'package:connectrpc/connect.dart';
 import 'package:connectrpc/io.dart' as connect_io;
 import 'package:connectrpc/protobuf.dart';
 import 'package:connectrpc/protocol/connect.dart' as protocol;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod/riverpod.dart';
 
 import 'package:mobile/gen/v1/auth.connect.client.dart';
 import 'package:mobile/gen/v1/auth.pb.dart';
 import 'package:mobile/shared/constants.dart';
-import 'package:mobile/shared/storage.dart';
 
 class AuthService {
-  final _storage = const FlutterSecureStorage();
-
   // Use the constructor like in the pub.dev example
   late final AuthServiceClient _client = AuthServiceClient(
     protocol.Transport(
@@ -34,18 +30,6 @@ class AuthService {
       RegisterRequest(name: name, email: email, password: password),
     );
     return tokens;
-  }
-
-  Future<Tokens> refresh(String refreshToken) async {
-    final tokens = await _client.refresh(
-      RefreshRequest(refreshToken: refreshToken),
-    );
-    return tokens;
-  }
-
-  Future<void> logout() async {
-    await _client.logout(LogoutRequest(refreshToken: (await _storage.read(key: 'refreshToken')) ?? ''));
-    await _storage.deleteAll();
   }
 }
 
